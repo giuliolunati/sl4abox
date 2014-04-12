@@ -89,7 +89,7 @@ public class TerminalBridge implements VDUDisplay, OnSharedPreferenceChangeListe
   private Relay relay;
 
   private Bitmap bitmap = null;
-  private final VDUBuffer buffer;
+  public final VDUBuffer buffer;
 
   private TerminalView parent = null;
   private final Canvas canvas = new Canvas();

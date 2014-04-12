@@ -516,6 +516,16 @@ public class ConsoleActivity extends Activity {
               && event.getEventTime() - event.getDownTime() < CLICK_TIME
               && Math.abs(event.getX() - lastX) < MAX_CLICK_DISTANCE
               && Math.abs(event.getY() - lastY) < MAX_CLICK_DISTANCE) {
+            // user has clicked the terminal view
+            // so send a mouse click event to the server
+            View flip = findCurrentView(R.id.console_flip);
+            if(flip == null) return false;
+            TerminalView terminal = (TerminalView)flip;
+            int row = (int)Math.floor(event.getY() / terminal.bridge.charHeight);
+            int col = (int)Math.floor(event.getX() / terminal.bridge.charWidth);
+
+            ((vt320) terminal.bridge.buffer).mousePressed(col, row, 16);
+            ((vt320) terminal.bridge.buffer).mouseReleased(col, row, 16);
             return false;
           }
         }
