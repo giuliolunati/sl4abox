@@ -112,8 +112,6 @@ public class ConsoleActivity extends Activity {
   private Animation slide_left_in, slide_left_out, slide_right_in, slide_right_out,
       fade_stay_hidden, fade_out_delayed;
 
-  private Animation keyboard_fade_in, keyboard_fade_out;
-  private ImageView keyboardButton;
   private float lastX, lastY;
 
   private int mTouchSlopSquare;
@@ -128,7 +126,7 @@ public class ConsoleActivity extends Activity {
   private Handler handler = new Handler();
 
   private static enum MenuId {
-    EDIT, PREFS, EMAIL, RESIZE, COPY, PASTE;
+    EDIT, PREFS, EMAIL, RESIZE, COPY, PASTE, KEYB;
     public int getId() {
       return ordinal() + Menu.FIRST;
     }
@@ -320,23 +318,8 @@ public class ConsoleActivity extends Activity {
     fade_out_delayed = AnimationUtils.loadAnimation(this, R.anim.fade_out_delayed);
     fade_stay_hidden = AnimationUtils.loadAnimation(this, R.anim.fade_stay_hidden);
 
-    // Preload animation for keyboard button
-    keyboard_fade_in = AnimationUtils.loadAnimation(this, R.anim.keyboard_fade_in);
-    keyboard_fade_out = AnimationUtils.loadAnimation(this, R.anim.keyboard_fade_out);
-
     inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-    keyboardButton = (ImageView) findViewById(R.id.keyboard_button);
-    keyboardButton.setOnClickListener(new OnClickListener() {
-      public void onClick(View view) {
-        View flip = findCurrentView(R.id.console_flip);
-        if (flip == null) {
-          return;
-        }
-
-        inputManager.showSoftInput(flip, InputMethodManager.SHOW_FORCED);
-        keyboardButton.setVisibility(View.GONE);
-      }
-    });
+    
     if (prefs.getBoolean(PreferenceConstants.HIDE_KEYBOARD, false)) {
       // Force hidden keyboard.
       getWindow().setSoftInputMode(
@@ -530,24 +513,9 @@ public class ConsoleActivity extends Activity {
           // Same as above, except now GestureDetector.onFling is called.
           flip.cancelLongPress();
           if (config.hardKeyboardHidden != Configuration.KEYBOARDHIDDEN_NO
-              && keyboardButton.getVisibility() == View.GONE
               && event.getEventTime() - event.getDownTime() < CLICK_TIME
               && Math.abs(event.getX() - lastX) < MAX_CLICK_DISTANCE
               && Math.abs(event.getY() - lastY) < MAX_CLICK_DISTANCE) {
-            keyboardButton.startAnimation(keyboard_fade_in);
-            keyboardButton.setVisibility(View.VISIBLE);
-
-            handler.postDelayed(new Runnable() {
-              public void run() {
-                if (keyboardButton.getVisibility() == View.GONE) {
-                  return;
-                }
-
-                keyboardButton.startAnimation(keyboard_fade_out);
-                keyboardButton.setVisibility(View.GONE);
-              }
-            }, KEYBOARD_DISPLAY_TIME);
-
             return false;
           }
         }
@@ -699,6 +667,7 @@ public class ConsoleActivity extends Activity {
   public void onCreateContextMenu(ContextMenu menu, View view, ContextMenuInfo menuInfo) {
     TerminalBridge bridge = ((TerminalView) findCurrentView(R.id.console_flip)).bridge;
     boolean sessionOpen = bridge.isSessionOpen();
+    menu.add(Menu.NONE, MenuId.KEYB.getId(), Menu.NONE, R.string.terminal_menu_keyb);
     menu.add(Menu.NONE, MenuId.COPY.getId(), Menu.NONE, R.string.terminal_menu_copy);
     if (clipboard.hasText() && sessionOpen) {
       menu.add(Menu.NONE, MenuId.PASTE.getId(), Menu.NONE, R.string.terminal_menu_paste);
@@ -709,7 +678,13 @@ public class ConsoleActivity extends Activity {
   @Override
   public boolean onContextItemSelected(MenuItem item) {
     int itemId = item.getItemId();
-    if (itemId == MenuId.COPY.getId()) {
+    if (itemId == MenuId.KEYB.getId()) {
+      View flip = findCurrentView(R.id.console_flip);
+      if (flip == null) {
+        return true;
+      }
+      inputManager.showSoftInput(flip, InputMethodManager.SHOW_FORCED);
+    } else if (itemId == MenuId.COPY.getId()) {
       TerminalView terminalView = (TerminalView) findCurrentView(R.id.console_flip);
       copySource = terminalView.bridge;
       SelectionArea area = copySource.getSelectionArea();

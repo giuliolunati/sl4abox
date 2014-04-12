@@ -98,6 +98,7 @@
   
   
   <string name="terminal_menu_close">Close</string>
+  <string name="terminal_menu_keyb">Keyboard</string>
   <string name="terminal_menu_copy">Copy</string>
   <string name="terminal_menu_paste">Paste</string>
   <string name="terminal_menu_resize">Force Size</string>
