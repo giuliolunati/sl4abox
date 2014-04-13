@@ -330,38 +330,23 @@ public class ConsoleActivity extends Activity {
     int touchSlop = configuration.getScaledTouchSlop();
     mTouchSlopSquare = touchSlop * touchSlop;
 
-    // detect fling gestures to switch between terminals
+    // detect gestures
     final GestureDetector detect =
         new GestureDetector(new GestureDetector.SimpleOnGestureListener() {
+          private float totalX = 0;
           private float totalY = 0;
-
-          @Override
-          public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-
-            final float distx = e2.getRawX() - e1.getRawX();
-            final float disty = e2.getRawY() - e1.getRawY();
-            final int goalwidth = flip.getWidth() / 2;
-
-            // need to slide across half of display to trigger console change
-            // make sure user kept a steady hand horizontally
-            if (Math.abs(disty) < (flip.getHeight() / 4)) {
-              if (distx > goalwidth) {
-                shiftCurrentTerminal(SHIFT_RIGHT);
-                return true;
-              }
-
-              if (distx < -goalwidth) {
-                shiftCurrentTerminal(SHIFT_LEFT);
-                return true;
-              }
-
-            }
-
-            return false;
-          }
+          private float totalS = 0;
+          private float totalZ = 0;
+          private float x0 = -999999;
+          private float y0 = -999999;
 
           @Override
           public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            final int flipw = flip.getWidth();
+            final int fliph = flip.getHeight();
+            final int flipsize;
+            if (flipw < fliph) flipsize = flipw;
+            else flipsize = fliph;
 
             // if copying, then ignore
             if (copySource != null && copySource.isSelectingForCopy()) {
@@ -373,52 +358,112 @@ public class ConsoleActivity extends Activity {
             }
 
             // if releasing then reset total scroll
-            if (e2.getAction() == MotionEvent.ACTION_UP) {
-              totalY = 0;
+            // if (e2.getAction() == MotionEvent.ACTION_UP) {
+            //  totalX = totalY = totalS = totalZ = 0;
+            // }
+    
+            // WARN previous test don't work: never TRUE! Use next instead (Giulio Lunati)
+            if (Math.abs(e1.getX()-x0) > 1
+                || Math.abs(e1.getY()-y0) > 1) {
+              totalX = totalY = totalS = totalZ = 0;
+              x0 = e1.getX(); y0 = e1.getY();
             }
 
-            // activate consider if within x tolerance
-            if (Math.abs(e1.getX() - e2.getX()) < ViewConfiguration.getTouchSlop() * 4) {
-
-              View flip = findCurrentView(R.id.console_flip);
-              if (flip == null) {
-                return false;
-              }
-              TerminalView terminal = (TerminalView) flip;
-
+            View flip = findCurrentView(R.id.console_flip);
+            if(flip == null) return false;
+            TerminalView terminal = (TerminalView)flip;
+ 
+            // vertical
+            if (Math.abs(distanceY) >= Math.abs(distanceX)) {
               // estimate how many rows we have scrolled through
               // accumulate distance that doesn't trigger immediate scroll
               totalY += distanceY;
-              final int moved = (int) (totalY / terminal.bridge.charHeight);
-
-              VDUBuffer buffer = terminal.bridge.getVDUBuffer();
-
-              // consume as scrollback only if towards right half of screen
-              if (e2.getX() > flip.getWidth() / 2) {
-                if (moved != 0) {
-                  int base = buffer.getWindowBase();
-                  buffer.setWindowBase(base + moved);
-                  totalY = 0;
+              final int moveY = (int)(totalY / terminal.bridge.charHeight);
+              // consume as scrollback
+              if (e1.getX() > flipw * 4/5) {
+                if (moveY != 0) {
+                  int base = terminal.bridge.buffer.getWindowBase();
+                  terminal.bridge.buffer.setWindowBase(base + moveY);
+                  totalX = totalY = totalS = totalZ = 0;
                   return true;
                 }
-              } else {
-                // otherwise consume as pgup/pgdown for every 5 lines
-                if (moved > 5) {
-                  ((vt320) buffer).keyPressed(vt320.KEY_PAGE_DOWN, ' ', 0);
-                  terminal.bridge.tryKeyVibrate();
-                  totalY = 0;
-                  return true;
-                } else if (moved < -5) {
-                  ((vt320) buffer).keyPressed(vt320.KEY_PAGE_UP, ' ', 0);
-                  terminal.bridge.tryKeyVibrate();
-                  totalY = 0;
-                  return true;
-                }
-
               }
-
+              else if (e2.getX() < flipw / 5) {
+                // consume as pgup/pgdown
+                if (totalY > fliph * 5/9) {
+                  ((vt320)terminal.bridge.buffer).keyPressed(vt320.KEY_PAGE_UP, ' ', 0);
+                  terminal.bridge.tryKeyVibrate();
+                  totalX = totalY = totalS = totalZ = 0;
+                  return true;
+                } else if (totalY < -fliph * 5/9) {
+                  ((vt320)terminal.bridge.buffer).keyPressed(vt320.KEY_PAGE_DOWN, ' ', 0);
+                  terminal.bridge.tryKeyVibrate();
+                  totalX = totalY = totalS = totalZ = 0;
+                  return true;
+                }
+              }
+              else if (flipw * 3/10 < e2.getX()
+                  && e2.getX() < flipw * 7/10){
+                // consume as arrow key
+                if (moveY > 0) {
+                  ((vt320)terminal.bridge.buffer).keyPressed(vt320.KEY_UP, ' ', 0);
+                  terminal.bridge.tryKeyVibrate();
+                  totalX = totalY = totalS = totalZ = 0;
+                  return true;
+                } else if (moveY < 0) {
+                  ((vt320)terminal.bridge.buffer).keyPressed(vt320.KEY_DOWN, ' ', 0);
+                  terminal.bridge.tryKeyVibrate();
+                  totalX = totalY = totalS = totalZ = 0;
+                  return true;
+                }
+              }
             }
-
+            // horizontal
+            else if (Math.abs(distanceX) > Math.abs(distanceY)) {
+              totalX -= distanceX; // yes, -= not += !
+              final int moveX = (int)(totalX / terminal.bridge.charWidth);
+              // change font size
+              if (e1.getY() < fliph / 3) {
+                if (totalX > flipw / 4) {
+                  terminal.bridge.increaseFontSize();
+                  totalX = totalY = totalS = totalZ = 0;
+                  return true;
+                }
+                else if (totalX < -flipw / 4) {
+                  terminal.bridge.decreaseFontSize();
+                  totalX = totalY = totalS = totalZ = 0;
+                  return true;
+                }
+              }
+              // switch terminal
+              else if (e2.getY() > fliph * 4/5) {
+                if (totalX > flipw * 5/9) {
+                  shiftCurrentTerminal(SHIFT_RIGHT);
+                  totalX = totalY = totalS = totalZ = 0;
+                  return true;
+                }
+                else if (totalX < -flipw * 5/9) {
+                  shiftCurrentTerminal(SHIFT_LEFT);
+                  totalX = totalY = totalS = totalZ = 0;
+                  return true;
+                }
+              }
+              // left and right arrows
+              else if (fliph * 3/10 < e2.getY()
+                  && e2.getY() < fliph * 7/10) {
+                if (moveX > 0) {
+                  ((vt320)terminal.bridge.buffer).keyPressed(vt320.KEY_RIGHT, ' ', 0);
+                  terminal.bridge.tryKeyVibrate();
+                  totalX = totalY = totalS = totalZ = 0;
+                  return true;
+                } else if (moveX < 0) {
+                  ((vt320)terminal.bridge.buffer).keyPressed(vt320.KEY_LEFT, ' ', 0);
+                  terminal.bridge.tryKeyVibrate();
+                  totalX = totalY = totalS = totalZ = 0;
+                  return true;
+                }
+              }
+            }
             return false;
           }
 
