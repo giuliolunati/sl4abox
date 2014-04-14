@@ -100,6 +100,10 @@ public class ConsoleActivity extends Activity {
 
   private SharedPreferences prefs = null;
 
+  // determines whether or not menuitem accelerators are bound
+  // otherwise they collide with an external keyboard's CTRL-char
+  private boolean hardKeyboard = false;
+
   private PowerManager.WakeLock wakelock = null;
 
   protected Integer processID;
@@ -252,9 +256,20 @@ public class ConsoleActivity extends Activity {
     booleanPromptGroup.setVisibility(View.GONE);
   }
 
+  // more like configureLaxMode -- enable network IO on UI thread
+  private void configureStrictMode() {
+    try {
+      Class.forName("android.os.StrictMode");
+      StrictModeSetup.run();
+    } catch (ClassNotFoundException e) {
+    }
+  }
+
   @Override
   public void onCreate(Bundle icicle) {
     super.onCreate(icicle);
+    configureStrictMode();
+    hardKeyboard = getResources().getConfiguration().keyboard == Configuration.KEYBOARD_QWERTY;
 
     this.setContentView(R.layout.act_console);
 
