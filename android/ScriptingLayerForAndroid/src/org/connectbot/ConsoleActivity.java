@@ -76,6 +76,7 @@ import de.mud.terminal.vt320;
 
 import org.connectbot.service.PromptHelper;
 import org.connectbot.service.TerminalBridge;
+import org.connectbot.service.TerminalKeyListener;
 import org.connectbot.service.TerminalManager;
 import org.connectbot.util.PreferenceConstants;
 import org.connectbot.util.SelectionArea;
@@ -126,7 +127,7 @@ public class ConsoleActivity extends Activity {
   private Handler handler = new Handler();
 
   private static enum MenuId {
-    EDIT, PREFS, EMAIL, RESIZE, COPY, PASTE, KEYB;
+    EDIT, PREFS, EMAIL, RESIZE, COPY, PASTE, KEYB, CTRL, ESC;
     public int getId() {
       return ordinal() + Menu.FIRST;
     }
@@ -723,6 +724,8 @@ public class ConsoleActivity extends Activity {
     TerminalBridge bridge = ((TerminalView) findCurrentView(R.id.console_flip)).bridge;
     boolean sessionOpen = bridge.isSessionOpen();
     menu.add(Menu.NONE, MenuId.KEYB.getId(), Menu.NONE, R.string.terminal_menu_keyb);
+    menu.add(Menu.NONE, MenuId.CTRL.getId(), Menu.NONE, R.string.terminal_menu_ctrl);
+    menu.add(Menu.NONE, MenuId.ESC.getId(), Menu.NONE, R.string.terminal_menu_esc);
     menu.add(Menu.NONE, MenuId.COPY.getId(), Menu.NONE, R.string.terminal_menu_copy);
     if (clipboard.hasText() && sessionOpen) {
       menu.add(Menu.NONE, MenuId.PASTE.getId(), Menu.NONE, R.string.terminal_menu_paste);
@@ -735,10 +738,20 @@ public class ConsoleActivity extends Activity {
     int itemId = item.getItemId();
     if (itemId == MenuId.KEYB.getId()) {
       View flip = findCurrentView(R.id.console_flip);
-      if (flip == null) {
-        return true;
-      }
+      if (flip == null) return true;
       inputManager.showSoftInput(flip, InputMethodManager.SHOW_FORCED);
+    } else if (itemId == MenuId.CTRL.getId()) {
+      View flip = findCurrentView(R.id.console_flip);
+      if (flip == null) return true;
+      TerminalView terminal = (TerminalView)flip;
+      TerminalKeyListener handler = terminal.bridge.getKeyHandler();
+      handler.metaPress(TerminalKeyListener.META_CTRL_ON);
+    } else if (itemId == MenuId.ESC.getId()) {
+      View flip = findCurrentView(R.id.console_flip);
+      if (flip == null) return true;
+      TerminalView terminal = (TerminalView)flip;
+      TerminalKeyListener handler = terminal.bridge.getKeyHandler();
+      handler.sendEscape();
     } else if (itemId == MenuId.COPY.getId()) {
       TerminalView terminalView = (TerminalView) findCurrentView(R.id.console_flip);
       copySource = terminalView.bridge;
