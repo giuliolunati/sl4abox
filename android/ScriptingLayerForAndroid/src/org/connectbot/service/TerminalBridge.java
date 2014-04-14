@@ -21,12 +21,12 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Typeface;
-import android.graphics.Bitmap.Config;
 import android.graphics.Paint.FontMetrics;
+import android.graphics.Typeface;
 import android.text.ClipboardManager;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -64,6 +64,7 @@ import org.connectbot.util.SelectionArea;
  * @author raaar
  * 
  */
+@SuppressWarnings("deprecation") // for ClipboardManager
 public class TerminalBridge implements VDUDisplay, OnSharedPreferenceChangeListener {
 
   private final static int FONT_SIZE_STEP = 2;
@@ -102,6 +103,8 @@ public class TerminalBridge implements VDUDisplay, OnSharedPreferenceChangeListe
 
   private boolean selectingForCopy = false;
   private final SelectionArea selectionArea;
+
+  // TODO add support for the new clipboard API
   private ClipboardManager clipboard;
 
   public int charWidth = -1;

@@ -41,6 +41,7 @@ import org.connectbot.util.SelectionArea;
  * @author kenny
  * @author modified by raaar
  */
+@SuppressWarnings("deprecation") // for ClipboardManager
 public class TerminalKeyListener implements OnKeyListener, OnSharedPreferenceChangeListener {
 
   public final static int META_CTRL_ON = 0x01;
@@ -78,7 +79,9 @@ public class TerminalKeyListener implements OnKeyListener, OnSharedPreferenceCha
 
   private int mDeadKey = 0;
 
+  // TODO add support for the new API.
   private ClipboardManager clipboard = null;
+
   private boolean selectingForCopy = false;
   private final SelectionArea selectionArea;
 
