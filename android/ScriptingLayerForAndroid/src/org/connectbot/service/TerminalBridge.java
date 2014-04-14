@@ -82,9 +82,9 @@ public class TerminalBridge implements VDUDisplay, OnSharedPreferenceChangeListe
   private String delKey;
   private String encoding;
 
-  private AbsTransport transport;
+  public AbsTransport transport;
 
-  private final Paint defaultPaint;
+  public final Paint defaultPaint;
 
   private Relay relay;
 
