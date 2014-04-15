@@ -99,6 +99,7 @@
   
   <string name="terminal_menu_close">Close</string>
   <string name="terminal_menu_keyb">Keyboard</string>
+  <string name="terminal_menu_input">LineInput</string>
   <string name="terminal_menu_ctrl">CTRL</string>
   <string name="terminal_menu_esc">ESC</string>
   <string name="terminal_menu_copy">Copy</string>

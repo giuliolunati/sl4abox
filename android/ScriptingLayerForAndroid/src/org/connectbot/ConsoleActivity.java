@@ -41,8 +41,11 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.text.ClipboardManager;
+import android.text.InputType;
+import android.text.method.SingleLineTransformationMethod;
 import android.view.ContextMenu;
 import android.view.GestureDetector;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -52,6 +55,7 @@ import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
+import android.view.View.OnKeyListener;
 import android.view.View.OnTouchListener;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -109,6 +113,9 @@ public class ConsoleActivity extends Activity {
   protected Integer processID;
 
   protected ClipboardManager clipboard;
+  private RelativeLayout stringPromptGroup;
+  protected EditText stringPrompt;
+  private TextView stringPromptInstructions;
 
   private RelativeLayout booleanPromptGroup;
   private TextView booleanPrompt;
@@ -131,7 +138,7 @@ public class ConsoleActivity extends Activity {
   private Handler handler = new Handler();
 
   private static enum MenuId {
-    EDIT, PREFS, EMAIL, RESIZE, COPY, PASTE, KEYB, CTRL, ESC;
+    EDIT, PREFS, EMAIL, RESIZE, COPY, PASTE, KEYB, CTRL, ESC, INPUT;
     public int getId() {
       return ordinal() + Menu.FIRST;
     }
@@ -253,7 +260,12 @@ public class ConsoleActivity extends Activity {
   }
 
   protected void hideAllPrompts() {
+    stringPromptGroup.setVisibility(View.GONE);
     booleanPromptGroup.setVisibility(View.GONE);
+    // adjust window back if size was changed during prompt input
+    View view = findCurrentView(R.id.console_flip);
+    if(!(view instanceof TerminalView)) return;
+    ((TerminalView)view).bridge.parentChanged((TerminalView)view);
   }
 
   // more like configureLaxMode -- enable network IO on UI thread
@@ -298,6 +310,30 @@ public class ConsoleActivity extends Activity {
     inflater = LayoutInflater.from(this);
 
     flip = (ViewFlipper) findViewById(R.id.console_flip);
+
+    stringPromptGroup = (RelativeLayout) findViewById(R.id.console_password_group);
+    stringPromptInstructions = (TextView) findViewById(R.id.console_password_instructions);
+    stringPrompt = (EditText)findViewById(R.id.console_password);
+    stringPrompt.setOnKeyListener(new OnKeyListener() {
+      public boolean onKey(View v, int keyCode, KeyEvent event) {
+        if(event.getAction() == KeyEvent.ACTION_UP) return false;
+        if(keyCode != KeyEvent.KEYCODE_ENTER) return false;
+
+        // pass collected password down to current terminal
+        String value = stringPrompt.getText().toString();
+
+        PromptHelper helper = getCurrentPromptHelper();
+        if(helper == null) return false;
+        helper.setResponse(value);
+
+        // finally clear password for next user
+        stringPrompt.setText("");
+        updatePromptVisible();
+
+        return true;
+      }
+    });
+
     booleanPromptGroup = (RelativeLayout) findViewById(R.id.console_boolean_group);
     booleanPrompt = (TextView) findViewById(R.id.console_prompt);
 
@@ -308,6 +344,7 @@ public class ConsoleActivity extends Activity {
         if (helper == null) {
           return;
         }
+        if(helper == null) return;
         helper.setResponse(Boolean.TRUE);
         updatePromptVisible();
       }
@@ -320,6 +357,7 @@ public class ConsoleActivity extends Activity {
         if (helper == null) {
           return;
         }
+        if(helper == null) return;
         helper.setResponse(Boolean.FALSE);
         updatePromptVisible();
       }
@@ -739,6 +777,7 @@ public class ConsoleActivity extends Activity {
     TerminalBridge bridge = ((TerminalView) findCurrentView(R.id.console_flip)).bridge;
     boolean sessionOpen = bridge.isSessionOpen();
     menu.add(Menu.NONE, MenuId.KEYB.getId(), Menu.NONE, R.string.terminal_menu_keyb);
+    menu.add(Menu.NONE, MenuId.INPUT.getId(), Menu.NONE, R.string.terminal_menu_input);
     menu.add(Menu.NONE, MenuId.CTRL.getId(), Menu.NONE, R.string.terminal_menu_ctrl);
     menu.add(Menu.NONE, MenuId.ESC.getId(), Menu.NONE, R.string.terminal_menu_esc);
     menu.add(Menu.NONE, MenuId.COPY.getId(), Menu.NONE, R.string.terminal_menu_copy);
@@ -755,6 +794,19 @@ public class ConsoleActivity extends Activity {
       View flip = findCurrentView(R.id.console_flip);
       if (flip == null) return true;
       inputManager.showSoftInput(flip, InputMethodManager.SHOW_FORCED);
+    } else if (itemId == MenuId.INPUT.getId()) {
+      View flip = findCurrentView(R.id.console_flip);
+      if (flip == null) return true;
+      final TerminalView terminal = (TerminalView)flip;
+      Thread promptThread = new Thread(new Runnable() {
+        public void run() {
+          String inj = getCurrentPromptHelper().requestStringPrompt(null, "");
+          terminal.bridge.injectString(inj);
+        }
+      });
+      promptThread.setName("Prompt");
+      promptThread.setDaemon(true);
+      promptThread.start();
     } else if (itemId == MenuId.CTRL.getId()) {
       View flip = findCurrentView(R.id.console_flip);
       if (flip == null) return true;
@@ -942,9 +994,26 @@ public class ConsoleActivity extends Activity {
       return;
     }
 
-    PromptHelper prompt = ((TerminalView) view).bridge.getPromptHelper();
+   PromptHelper prompt = ((TerminalView) view).bridge.getPromptHelper();
+    if(String.class.equals(prompt.promptRequested)) {
+      stringPromptGroup.setVisibility(View.VISIBLE);
 
-    if (Boolean.class.equals(prompt.promptRequested)) {
+      String instructions = prompt.promptInstructions;
+      if (instructions != null && instructions.length() > 0) {
+        stringPromptInstructions.setVisibility(View.VISIBLE);
+        stringPromptInstructions.setText(instructions);
+      } else
+        stringPromptInstructions.setVisibility(View.GONE);
+
+      stringPrompt.setInputType(InputType.TYPE_CLASS_TEXT |
+                    InputType.TYPE_TEXT_FLAG_AUTO_CORRECT);
+      stringPrompt.setTransformationMethod(SingleLineTransformationMethod.getInstance());
+
+      stringPrompt.setText("");
+      stringPrompt.setHint(prompt.promptHint);
+      stringPrompt.requestFocus();
+
+    } else if(Boolean.class.equals(prompt.promptRequested)) {
       booleanPromptGroup.setVisibility(View.VISIBLE);
       booleanPrompt.setText(prompt.promptHint);
       booleanYes.requestFocus();
