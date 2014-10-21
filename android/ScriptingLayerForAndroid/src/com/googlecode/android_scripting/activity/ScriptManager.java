@@ -130,7 +130,7 @@ public class ScriptManager extends ListActivity {
             .setIcon(android.R.drawable.ic_dialog_alert).setPositiveButton("Ok", null).show();
       }
     } else {
-      new AlertDialog.Builder(this).setTitle("External Storage Unavilable")
+      new AlertDialog.Builder(this).setTitle("External Storage Unavailable")
           .setMessage("Scripts will be unavailable as long as external storage is unavailable.")
           .setIcon(android.R.drawable.ic_dialog_alert).setPositiveButton("Ok", null).show();
     }
