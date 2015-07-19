@@ -30,6 +30,8 @@ public class Sl4aApplication extends BaseApplication {
   @Override
   public void onCreate() {
     super.onCreate();
+    // Analytics.start(this, "UA-158835-13");
+
     // extract run_pie from asset folder.
     File path = new File(this.getFilesDir(), "run_pie");
     if (!path.isFile()) {
