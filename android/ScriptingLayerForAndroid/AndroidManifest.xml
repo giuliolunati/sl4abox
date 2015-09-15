@@ -36,11 +36,7 @@
         tools:replace="android:label,android:icon">
 		<activity android:name=".activity.ScriptManager"
 			android:configChanges="keyboardHidden|orientation"
-			android:windowSoftInputMode="adjustResize" android:launchMode="singleTop">
-			<intent-filter>
-				<action android:name="android.intent.action.MAIN" />
-				<category android:name="android.intent.category.LAUNCHER" />
-			</intent-filter>
+			android:windowSoftInputMode="adjustResize" android:launchMode="singleTask">
 			<intent-filter>
 				<action android:name="android.intent.action.SEARCH" />
 			</intent-filter>
@@ -125,7 +121,12 @@
 		<service android:name=".activity.ScriptingLayerService" />
 		<service android:name=".activity.TriggerService" />
 		<activity android:name=".activity.InterpreterManager"
-			android:launchMode="singleTask" android:configChanges="keyboardHidden|orientation" />
+			android:launchMode="singleTask" android:configChanges="keyboardHidden|orientation" >
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+		</activity>
 		<activity android:name=".activity.LogcatViewer"
 			android:launchMode="singleTask" android:configChanges="keyboardHidden|orientation" />
 		<activity android:name=".activity.ScriptsLiveFolder"

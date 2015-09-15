@@ -48,7 +48,6 @@ import com.googlecode.android_scripting.ActivityFlinger;
 import com.googlecode.android_scripting.BaseApplication;
 import com.googlecode.android_scripting.Constants;
 import com.googlecode.android_scripting.FileUtils;
-import com.googlecode.android_scripting.IntentBuilders;
 import com.googlecode.android_scripting.Log;
 import com.googlecode.android_scripting.R;
 import com.googlecode.android_scripting.ScriptListAdapter;
@@ -148,7 +147,6 @@ public class ScriptManager extends ListActivity {
     setListAdapter(mAdapter);
     ActivityFlinger.attachView(getListView(), this);
     ActivityFlinger.attachView(getWindow().getDecorView(), this);
-    startService(IntentBuilders.buildTriggerServiceIntent());
     handleIntent(getIntent());
     UsageTrackingConfirmation.show(this);
     // Analytics.trackActivity(this);

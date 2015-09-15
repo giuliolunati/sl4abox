@@ -44,6 +44,8 @@ import com.googlecode.android_scripting.BaseApplication;
 import com.googlecode.android_scripting.Constants;
 import com.googlecode.android_scripting.FeaturedInterpreters;
 import com.googlecode.android_scripting.R;
+import com.googlecode.android_scripting.dialog.UsageTrackingConfirmation;
+import com.googlecode.android_scripting.IntentBuilders;
 import com.googlecode.android_scripting.dialog.Help;
 import com.googlecode.android_scripting.interpreter.Interpreter;
 import com.googlecode.android_scripting.interpreter.InterpreterConfiguration;
@@ -82,6 +84,8 @@ public class InterpreterManager extends ListActivity {
     setListAdapter(mAdapter);
     ActivityFlinger.attachView(getListView(), this);
     ActivityFlinger.attachView(getWindow().getDecorView(), this);
+    startService(IntentBuilders.buildTriggerServiceIntent());
+    UsageTrackingConfirmation.show(this);
     mFeaturedInterpreters = FeaturedInterpreters.getList();
     mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     // Analytics.trackActivity(this);
