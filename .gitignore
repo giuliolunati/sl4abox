@@ -1,0 +1,15 @@
+**/gen/
+**/obj/
+*.diff
+**/libs/armeabi/
+QuickAction/bin/
+ScriptingLayerForAndroid/bin
+Session.vim
+BluetoothFacade/bin/
+Common/bin/
+InterpreterForAndroid/bin/
+ScriptingLayer/bin/
+SignalStrengthFacade/bin/
+TextToSpeechFacade/bin/
+Utils/bin/
+WebCamFacade/bin/
