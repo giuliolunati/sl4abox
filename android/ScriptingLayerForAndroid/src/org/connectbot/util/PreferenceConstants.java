@@ -66,7 +66,7 @@ public class PreferenceConstants {
   public final static int DEFAULT_FG_COLOR = 0xffcccccc;
   public final static int DEFAULT_BG_COLOR = 0xff000000;
   public final static int DEFAULT_SCROLLBACK = 140;
-  public final static float DEFAULT_FONT_SIZE = 10;
+  public final static float DEFAULT_FONT_SIZE = 16;
 
   public final static String COLOR_FG = "color_fg";
   public final static String COLOR_BG = "color_bg";

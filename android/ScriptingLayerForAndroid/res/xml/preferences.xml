@@ -43,7 +43,7 @@
     <EditTextPreference
       android:key="fontsize"
       android:title="@string/pref_fontsize_title"
-      android:defaultValue="10" />
+      android:defaultValue="16" />
     <org.connectbot.util.EncodingPreference
       android:key="encoding"
       android:title="@string/pref_encoding_title"
