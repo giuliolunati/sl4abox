@@ -11,5 +11,6 @@ android/InterpreterForAndroid/bin/
 android/ScriptingLayer/bin/
 android/SignalStrengthFacade/bin/
 android/TextToSpeechFacade/bin/
+android/USBHostSerialFacade/bin/
 android/Utils/bin/
 android/WebCamFacade/bin/
