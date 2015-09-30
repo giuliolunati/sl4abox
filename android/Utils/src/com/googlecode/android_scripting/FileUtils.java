@@ -16,18 +16,23 @@
 
 package com.googlecode.android_scripting;
 
+import com.googlecode.android_scripting.exception.Sl4aException;
+
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.os.Environment;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.lang.reflect.Method;
 
 /**
@@ -169,4 +174,30 @@ public class FileUtils {
     return builder.toString();
   }
 
+  public static long download(String urlString, File mFile) throws Exception {
+    URL url = new URL(urlString);
+    FileOutputStream mOutputStream;
+    URLConnection connection = null;
+    try {
+      connection = url.openConnection();
+    } catch (IOException e) {
+      throw new Sl4aException("Cannot open URL: " + url, e);
+    }
+
+    int contentLength = connection.getContentLength();
+
+    try {
+      mOutputStream = new FileOutputStream(mFile);
+    } catch (FileNotFoundException e) {
+      throw new Sl4aException(e);
+    }
+
+    int bytesCopied = IoUtils.copy(connection.getInputStream(), mOutputStream);
+    if (bytesCopied != contentLength && contentLength != -1) {
+      throw new IOException("Download incomplete: " + bytesCopied + " != " + contentLength);
+    }
+    mOutputStream.close();
+    Log.v("Download completed successfully.");
+    return bytesCopied;
+  }
 }

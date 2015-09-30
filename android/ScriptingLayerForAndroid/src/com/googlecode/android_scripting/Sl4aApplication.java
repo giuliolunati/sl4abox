@@ -16,14 +16,19 @@
 
 package com.googlecode.android_scripting;
 
+import com.googlecode.android_scripting.FileUtils;
+
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.Process;
+import java.lang.ProcessBuilder;
 
 public class Sl4aApplication extends BaseApplication {
 
@@ -64,6 +69,34 @@ public class Sl4aApplication extends BaseApplication {
         e.printStackTrace();
       } catch (IOException e) {
         e.printStackTrace();
+      }
+    }
+    // install kbox
+    path = new File(this.getFilesDir(), "bin/busybox");
+    if (!path.isFile()) {
+      path = new File(this.getFilesDir(), "kbox-installer.sh");
+      if (!path.isFile()) {
+        String url = "http://giuliolunati.altervista.org/kbox/kbox3-installer.sh";
+        if (android.os.Build.VERSION.RELEASE.compareTo("4.1") < 0)
+            url = "http://giuliolunati.altervista.org/kbox/kbox2-installer.sh";
+        try {
+          FileUtils.download(url,path);
+        } catch (Exception e) {
+          Toast.makeText(this,
+              "Can't download " + url,
+              Toast.LENGTH_LONG
+          ).show();
+        }
+      }
+      String[] cmds = {"/system/bin/sh","kbox-installer.sh"};
+      ProcessBuilder pb = new ProcessBuilder(cmds);
+      pb.directory(this.getFilesDir());
+      try {
+        Process p = pb.start();
+        p.waitFor();
+      }
+      catch (Exception e) {
+        Toast.makeText(this, e+"!", Toast.LENGTH_LONG).show();
       }
     }
   }

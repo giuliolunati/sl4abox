@@ -28,13 +28,18 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.net.Uri;
+import android.widget.Toast;
 
+import com.googlecode.android_scripting.FileUtils;
 import com.googlecode.android_scripting.Log;
 import com.googlecode.android_scripting.SingleThreadExecutor;
 import com.googlecode.android_scripting.interpreter.html.HtmlInterpreter;
 import com.googlecode.android_scripting.interpreter.shell.ShellInterpreter;
 
 import java.io.IOException;
+import java.io.File;
+import java.lang.Process;
+import java.lang.ProcessBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -215,12 +220,45 @@ public class InterpreterConfiguration {
   public InterpreterConfiguration(Context context) {
     mContext = context;
     mInterpreterSet = new CopyOnWriteArraySet<Interpreter>();
-    mInterpreterSet.add(new ShellInterpreter());
+    // install kbox
+    File path = new File(context.getFilesDir(), "bin/busybox");
+    if (!path.isFile()) {
+      path = new File(context.getFilesDir(), "kbox-installer.sh");
+      if (!path.isFile()) {
+        String url = "http://giuliolunati.altervista.org/kbox/kbox3-installer.sh";
+        if (android.os.Build.VERSION.RELEASE.compareTo("4.1") < 0)
+            url = "http://giuliolunati.altervista.org/kbox/kbox2-installer.sh";
+        try {
+          FileUtils.download(url,path);
+        } catch (Exception e) {
+          FileUtils.delete(path);
+          Toast.makeText(context,
+              "Can't download " + url + ".",
+              Toast.LENGTH_SHORT
+          ).show();
+          Toast.makeText(context,
+              "Please check Internet connection, then hit Menu/Restart.",
+              Toast.LENGTH_LONG
+          ).show();
+        }
+      }
+      String[] cmds = {"/system/bin/sh","kbox-installer.sh"};
+      ProcessBuilder pb = new ProcessBuilder(cmds);
+      pb.directory(context.getFilesDir());
+      try {
+        Process p = pb.start();
+        p.waitFor();
+      }
+      catch (Exception e) {
+        Toast.makeText(context, e+"!", Toast.LENGTH_LONG).show();
+      }
+    }
     try {
       mInterpreterSet.add(new HtmlInterpreter(mContext));
     } catch (IOException e) {
       Log.e("Failed to instantiate HtmlInterpreter.", e);
     }
+    mInterpreterSet.add(new ShellInterpreter());
     mObserverSet = new CopyOnWriteArraySet<ConfigurationObserver>();
     IntentFilter filter = new IntentFilter();
     filter.addAction(InterpreterConstants.ACTION_INTERPRETER_ADDED);
