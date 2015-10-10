@@ -103,7 +103,7 @@ public class FacadeConfiguration {
     }
 
     if (sSdkLevel >= 12) {
-      sFacadeClassList.add(USBHostSerialFacade.class);
+      //sFacadeClassList.add(USBHostSerialFacade.class);
     }
 
     for (Class<? extends RpcReceiver> recieverClass : sFacadeClassList) {
