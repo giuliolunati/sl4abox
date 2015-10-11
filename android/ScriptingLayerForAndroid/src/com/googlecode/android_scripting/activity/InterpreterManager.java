@@ -16,8 +16,10 @@
 
 package com.googlecode.android_scripting.activity;
 
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
@@ -66,7 +68,7 @@ public class InterpreterManager extends ListActivity {
   private SharedPreferences mPreferences;
 
   private static enum MenuId {
-    HELP, ADD, NETWORK, PREFERENCES;
+    HELP, ADD, NETWORK, PREFERENCES, RESTART;
     public int getId() {
       return ordinal() + Menu.FIRST;
     }
@@ -120,6 +122,8 @@ public class InterpreterManager extends ListActivity {
         android.R.drawable.ic_menu_preferences);
     menu.add(Menu.NONE, MenuId.HELP.getId(), Menu.NONE, "Help").setIcon(
         android.R.drawable.ic_menu_help);
+    menu.add(Menu.NONE, MenuId.RESTART.getId(), Menu.NONE, "Restart").setIcon(
+        R.drawable.ic_menu_refresh);
     return super.onPrepareOptionsMenu(menu);
   }
 
@@ -149,6 +153,8 @@ public class InterpreterManager extends ListActivity {
       dialog.show();
     } else if (itemId == MenuId.PREFERENCES.getId()) {
       startActivity(new Intent(this, Preferences.class));
+    } else if (itemId == MenuId.RESTART.getId()) {
+      restart((Context)this,500);
     } else if (itemId >= MenuId.values().length + Menu.FIRST) {
       int i = itemId - MenuId.values().length - Menu.FIRST;
       if (i < mFeaturedInterpreters.size()) {
@@ -271,5 +277,17 @@ public class InterpreterManager extends ListActivity {
       text.setText(interpreter.getNiceName());
       return container;
     }
+  }
+
+  private static void restart(Context context, int delay) {
+    if (delay == 0) delay = 1;
+    Intent restartIntent = context.getPackageManager()
+        .getLaunchIntentForPackage(context.getPackageName() );
+    PendingIntent intent = PendingIntent.getActivity(
+        context, 0,
+        restartIntent, Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    AlarmManager manager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+    manager.set(AlarmManager.RTC, System.currentTimeMillis() + delay, intent);
+    System.exit(2);
   }
 }
