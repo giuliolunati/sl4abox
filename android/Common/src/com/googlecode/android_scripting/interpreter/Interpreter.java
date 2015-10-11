@@ -91,7 +91,7 @@ public class Interpreter implements InterpreterPropertyNames {
     return mArguments;
   }
 
-  private void putAllEnvironmentVariables(Map<String, String> environmentVariables) {
+  public void putAllEnvironmentVariables(Map<String, String> environmentVariables) {
     mEnvironment.putAll(environmentVariables);
   }
 

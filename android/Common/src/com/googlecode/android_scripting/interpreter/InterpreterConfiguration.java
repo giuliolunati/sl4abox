@@ -16,6 +16,8 @@
 
 package com.googlecode.android_scripting.interpreter;
 
+import com.googlecode.android_scripting.FileUtils;
+
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -36,10 +38,13 @@ import com.googlecode.android_scripting.SingleThreadExecutor;
 import com.googlecode.android_scripting.interpreter.html.HtmlInterpreter;
 import com.googlecode.android_scripting.interpreter.shell.ShellInterpreter;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.File;
 import java.lang.Process;
 import java.lang.ProcessBuilder;
+import java.io.FileReader;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -218,6 +223,7 @@ public class InterpreterConfiguration {
   }
 
   public InterpreterConfiguration(Context context) {
+    String kbox = context.getFilesDir().getAbsolutePath();
     mContext = context;
     mInterpreterSet = new CopyOnWriteArraySet<Interpreter>();
     // install kbox
@@ -258,7 +264,79 @@ public class InterpreterConfiguration {
     } catch (IOException e) {
       Log.e("Failed to instantiate HtmlInterpreter.", e);
     }
-    mInterpreterSet.add(new ShellInterpreter());
+    File dir = new File(kbox+"/usr/share/desktop");
+    if (dir.exists()) {
+      File[] files = dir.listFiles();
+      Arrays.sort(files);
+      for (File f : files) {
+        if (!f.getAbsolutePath().endsWith(".desktop")) continue;
+        try {
+          String l;
+          String name = "";
+          String tryexec = "";
+          String exec = "";
+          String ext = "";
+          String interact = "";
+          String script = "";
+          String install = "";
+          BufferedReader r = new BufferedReader(new FileReader(f));
+          while ((l = r.readLine()) != null) {
+            if (l.startsWith("Name=")) {
+              name = l.substring(5);
+            }
+            if (l.startsWith("Exec=")) {
+              exec = kbox+l.substring(5);
+            }
+            if (l.startsWith("TryExec=")) {
+              tryexec = kbox+l.substring(8);
+            }
+            if (l.startsWith("Interactive=")) {
+              interact = l.substring(12);
+            }
+            if (l.startsWith("Script=")) {
+              script = l.substring(7);
+            }
+            if (l.startsWith("Ext=")) {
+              ext = l.substring(4);
+            }
+            if (l.startsWith("Install=")) {
+              install = l.substring(8);
+            }
+          }
+	  if (tryexec.equals("")) tryexec = exec;
+          if (new File(tryexec).exists()) {
+            mInterpreterSet.add(new KboxInterpreter(
+                name,
+                exec,
+                interact,
+                script,
+                ext,
+                kbox,
+                "/home/kbox"
+            ));
+          } else {
+            mInterpreterSet.add(new KboxInterpreter(
+                "Install " + name,
+                kbox + "/bin/bash",
+                "-c,"+install,
+                "-c,"+install,
+                ext,
+                kbox,
+                "/home/kbox"
+            ));
+          }
+        } catch (Exception e) {}
+      }
+    }
+    mInterpreterSet.add(new KboxInterpreter(
+      "System Shell",
+      "/system/bin/sh",
+      "-l",
+      "-l,%s",
+      ".sh",
+      "/",
+      kbox
+    ));
     mObserverSet = new CopyOnWriteArraySet<ConfigurationObserver>();
     IntentFilter filter = new IntentFilter();
     filter.addAction(InterpreterConstants.ACTION_INTERPRETER_ADDED);

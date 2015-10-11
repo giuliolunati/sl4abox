@@ -25,6 +25,7 @@ import com.googlecode.android_scripting.jsonrpc.RpcReceiverManagerFactory;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 
 /**
  * This is a skeletal implementation of an interpreter process.
@@ -107,7 +108,7 @@ public class InterpreterProcess extends Process {
     // Analytics.track(mInterpreter.getName());
     // NOTE(damonkohler): String.isEmpty() doesn't work on Cupcake.
     if (!mCommand.equals("")) {
-      addArgument(mCommand);
+      addAllArguments(Arrays.asList(mCommand.split(",")));
     }
     super.start(shutdownHook);
   }
