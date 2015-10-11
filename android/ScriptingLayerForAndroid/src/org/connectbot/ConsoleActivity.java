@@ -677,9 +677,7 @@ public class ConsoleActivity extends Activity {
     TerminalBridge bridge = ((TerminalView) findCurrentView(R.id.console_flip)).bridge;
     boolean sessionOpen = bridge.isSessionOpen();
     menu.findItem(R.id.terminal_menu_resize).setEnabled(sessionOpen);
-    if (bridge.getProcess() instanceof ScriptProcess) {
-      menu.findItem(R.id.terminal_menu_exit_and_edit).setEnabled(true);
-    }
+    menu.findItem(R.id.terminal_menu_exit).setEnabled(true);
     bridge.onPrepareOptionsMenu(menu);
     return true;
   }
@@ -696,7 +694,7 @@ public class ConsoleActivity extends Activity {
     case R.id.terminal_menu_send_email:
       doEmailTranscript();
       break;
-    case R.id.terminal_menu_exit_and_edit:
+    case R.id.terminal_menu_exit:
       TerminalView terminalView = (TerminalView) findCurrentView(R.id.console_flip);
       TerminalBridge bridge = terminalView.bridge;
       if (manager != null) {
@@ -708,10 +706,6 @@ public class ConsoleActivity extends Activity {
         startService(intent);
         Message.obtain(disconnectHandler, -1, bridge).sendToTarget();
       }
-      Intent intent = new Intent(Constants.ACTION_EDIT_SCRIPT);
-      ScriptProcess process = (ScriptProcess) bridge.getProcess();
-      intent.putExtra(Constants.EXTRA_SCRIPT_PATH, process.getPath());
-      startActivity(intent);
       finish();
       break;
     }

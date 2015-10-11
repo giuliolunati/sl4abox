@@ -28,9 +28,9 @@
     android:alphabeticShortcut="p"
     android:icon="@android:drawable/ic_menu_preferences" />
   <item
-    android:id="@+id/terminal_menu_exit_and_edit"
-    android:title="Exit &amp; Edit"
+    android:id="@+id/terminal_menu_exit"
+    android:title="Exit"
     android:alphabeticShortcut="q"
     android:enabled="false"
-    android:icon="@android:drawable/ic_menu_edit" />
+    android:icon="@android:drawable/ic_menu_close_clear_cancel" />
 </menu>
