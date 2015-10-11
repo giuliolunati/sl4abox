@@ -364,12 +364,13 @@ public class TerminalBridge implements VDUDisplay, OnSharedPreferenceChangeListe
       Thread disconnectPromptThread = new Thread(new Runnable() {
         public void run() {
           String prompt = null;
+          Boolean result;
           if (transport != null && transport.isConnected()) {
-            prompt = manager.getResources().getString(R.string.prompt_confirm_exit);
+            result = false;
           } else {
             prompt = manager.getResources().getString(R.string.prompt_process_exited);
+            result = promptHelper.requestBooleanPrompt(null, prompt);
           }
-          Boolean result = promptHelper.requestBooleanPrompt(null, prompt);
 
           if (transport != null && transport.isConnected()) {
             manager.closeConnection(TerminalBridge.this, result != null && result.booleanValue());
