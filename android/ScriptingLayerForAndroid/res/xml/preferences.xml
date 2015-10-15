@@ -96,7 +96,7 @@
       android:key="bumpyarrows"
       android:title="@string/pref_bumpyarrows_title"
       android:summary="@string/pref_bumpyarrows_summary"
-      android:defaultValue="true" />
+      android:defaultValue="false" />
     <CheckBoxPreference
       android:key="hidekeyboard"
       android:title="@string/pref_hidekeyboard_title"
@@ -108,14 +108,14 @@
     <CheckBoxPreference
       android:key="bell"
       android:title="@string/pref_bell_title"
-      android:defaultValue="true" />
+      android:defaultValue="false" />
     <org.connectbot.util.VolumePreference
       android:key="bellVolume"
       android:title="@string/pref_bell_volume_title" />
     <CheckBoxPreference
       android:key="bellVibrate"
       android:title="@string/pref_bell_vibrate_title"
-      android:defaultValue="true" />
+      android:defaultValue="false" />
   </PreferenceCategory>
   <PreferenceCategory
 	  android:title="Trigger Behaviour">

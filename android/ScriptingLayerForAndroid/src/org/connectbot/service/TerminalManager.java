@@ -90,9 +90,9 @@ public class TerminalManager implements OnSharedPreferenceChangeListener {
     hardKeyboardHidden =
         (mResources.getConfiguration().hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_YES);
     vibrator = (Vibrator) mService.getSystemService(Context.VIBRATOR_SERVICE);
-    wantKeyVibration = mPreferences.getBoolean(PreferenceConstants.BUMPY_ARROWS, true);
-    wantBellVibration = mPreferences.getBoolean(PreferenceConstants.BELL_VIBRATE, true);
-    wantAudible = mPreferences.getBoolean(PreferenceConstants.BELL, true);
+    wantKeyVibration = mPreferences.getBoolean(PreferenceConstants.BUMPY_ARROWS, false);
+    wantBellVibration = mPreferences.getBoolean(PreferenceConstants.BELL_VIBRATE, false);
+    wantAudible = mPreferences.getBoolean(PreferenceConstants.BELL, false);
     if (wantAudible) {
       enableMediaPlayer();
     }
