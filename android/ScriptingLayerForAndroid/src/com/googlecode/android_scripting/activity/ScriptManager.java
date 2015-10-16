@@ -58,7 +58,6 @@ import com.googlecode.android_scripting.facade.FacadeConfiguration;
 import com.googlecode.android_scripting.interpreter.Interpreter;
 import com.googlecode.android_scripting.interpreter.InterpreterConfiguration;
 import com.googlecode.android_scripting.interpreter.InterpreterConfiguration.ConfigurationObserver;
-import com.googlecode.android_scripting.interpreter.InterpreterConstants;
 
 import java.io.File;
 import java.util.Collections;
@@ -90,7 +89,7 @@ public class ScriptManager extends ListActivity {
   private boolean mInSearchResultMode = false;
   private String mQuery = EMPTY;
   private File mCurrentDir;
-  private final File mBaseDir = new File(InterpreterConstants.SCRIPTS_ROOT);
+  private File mBaseDir;
   private final Handler mHandler = new Handler();
   private File mCurrent;
 
@@ -109,32 +108,10 @@ public class ScriptManager extends ListActivity {
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    mBaseDir = new File(getFilesDir().getAbsolutePath(),"usr");
     CustomizeWindow.requestCustomTitle(this, "Scripts", R.layout.script_manager);
-    if (FileUtils.externalStorageMounted()) {
-      File sl4a = mBaseDir.getParentFile();
-      if (!sl4a.exists()) {
-        sl4a.mkdir();
-        try {
-          FileUtils.chmod(sl4a, 0755); // Handle the sl4a parent folder first.
-        } catch (Exception e) {
-          // Not much we can do here if it doesn't work.
-        }
-      }
-      if (!FileUtils.makeDirectories(mBaseDir, 0755)) {
-        new AlertDialog.Builder(this)
-            .setTitle("Error")
-            .setMessage(
-                "Failed to create scripts directory.\n" + mBaseDir + "\n"
-                    + "Please check the permissions of your external storage media.")
-            .setIcon(android.R.drawable.ic_dialog_alert).setPositiveButton("Ok", null).show();
-      }
-    } else {
-      new AlertDialog.Builder(this).setTitle("External Storage Unavailable")
-          .setMessage("Scripts will be unavailable as long as external storage is unavailable.")
-          .setIcon(android.R.drawable.ic_dialog_alert).setPositiveButton("Ok", null).show();
-    }
 
-    mCurrentDir = mBaseDir;
+    mCurrentDir = new File(mBaseDir, "share/scripts");
     mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     mAdapter = new ScriptManagerAdapter(this);
     mObserver = new ScriptListObserver();

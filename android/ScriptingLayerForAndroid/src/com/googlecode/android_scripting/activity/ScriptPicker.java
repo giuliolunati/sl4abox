@@ -34,7 +34,6 @@ import com.googlecode.android_scripting.R;
 import com.googlecode.android_scripting.ScriptListAdapter;
 import com.googlecode.android_scripting.ScriptStorageAdapter;
 import com.googlecode.android_scripting.interpreter.InterpreterConfiguration;
-import com.googlecode.android_scripting.interpreter.InterpreterConstants;
 
 import java.io.File;
 import java.util.List;
@@ -53,15 +52,27 @@ public class ScriptPicker extends ListActivity {
   private ScriptPickerAdapter mAdapter;
   private InterpreterConfiguration mConfiguration;
   private File mCurrentDir;
-  private final File mBaseDir = new File(InterpreterConstants.SCRIPTS_ROOT);
+  private File mBaseDir;
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    mBaseDir = new File(getFilesDir().getAbsolutePath(), "/usr");
     CustomizeWindow.requestCustomTitle(this, "Scripts", R.layout.script_manager);
-    mCurrentDir = mBaseDir;
+    mCurrentDir = new File(mBaseDir, "/share/scripts");
     mConfiguration = ((BaseApplication) getApplication()).getInterpreterConfiguration();
-    mScripts = ScriptStorageAdapter.listExecutableScripts(null, mConfiguration);
+    mScripts = ScriptStorageAdapter.listExecutableScripts(mCurrentDir, mConfiguration);
+    mScripts.add(0, new File(mCurrentDir.getParent()) {
+      @Override
+      public boolean isDirectory() {
+        return true;
+      }
+
+      @Override
+      public String getName() {
+        return "..";
+      }
+    });
     mAdapter = new ScriptPickerAdapter(this);
     mAdapter.registerDataSetObserver(new ScriptListObserver());
     setListAdapter(mAdapter);
