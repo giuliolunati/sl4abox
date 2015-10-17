@@ -329,7 +329,7 @@ public class InterpreterConfiguration {
       }
     }
     mInterpreterSet.add(new KboxInterpreter(
-      "System Shell",
+      "Maintenance Shell",
       "/system/bin/sh",
       "-l",
       "-l,%s",
