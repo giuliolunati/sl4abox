@@ -219,7 +219,6 @@ public class InterpreterConfiguration {
         remove(packageName);
       }
     }
-
   }
 
   public InterpreterConfiguration(Context context) {
@@ -230,25 +229,37 @@ public class InterpreterConfiguration {
     File path = new File(context.getFilesDir(), "bin/busybox");
     if (!path.isFile()) {
       path = new File(context.getFilesDir(), "kbox-installer.sh");
-      if (!path.isFile()) {
-        String url = "http://giuliolunati.altervista.org/kbox/kbox3-installer.sh";
-        if (android.os.Build.VERSION.RELEASE.compareTo("4.1") < 0)
-            url = "http://giuliolunati.altervista.org/kbox/kbox2-installer.sh";
-        try {
-          FileUtils.download(url,path);
-        } catch (Exception e) {
-          FileUtils.delete(path);
-          Toast.makeText(context,
-              "Can't download " + url + ".",
-              Toast.LENGTH_SHORT
-          ).show();
-          Toast.makeText(context,
-              "Please check Internet connection, then hit Menu/Restart.",
-              Toast.LENGTH_LONG
-          ).show();
-        }
+      String url = "http://giuliolunati.altervista.org/kbox/kbox3-installer.sh";
+      if (android.os.Build.VERSION.RELEASE.compareTo("4.1") < 0)
+          url = "http://giuliolunati.altervista.org/kbox/kbox2-installer.sh";
+      try {
+        FileUtils.download(url,path);
+      } catch (Exception e) {
+        FileUtils.delete(path);
+        Toast.makeText(context,
+            "Can't download " + url + ".",
+            Toast.LENGTH_SHORT
+        ).show();
+        Toast.makeText(context,
+            "Please check Internet connection, then hit Menu/Restart.",
+            Toast.LENGTH_LONG
+        ).show();
       }
       String[] cmds = {"/system/bin/sh","kbox-installer.sh"};
+      ProcessBuilder pb = new ProcessBuilder(cmds);
+      pb.directory(context.getFilesDir());
+      try {
+        Process p = pb.start();
+        p.waitFor();
+      }
+      catch (Exception e) {
+        Toast.makeText(context, e+"!", Toast.LENGTH_LONG).show();
+      }
+    }
+    // install r3
+    path = new File(context.getFilesDir(), "usr/bin/r3");
+    if (!path.isFile()) {
+      String[] cmds = {"/system/bin/sh","bin/kbox_shell","-c","kpkg i r3"};
       ProcessBuilder pb = new ProcessBuilder(cmds);
       pb.directory(context.getFilesDir());
       try {
