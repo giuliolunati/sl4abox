@@ -36,7 +36,6 @@ import com.googlecode.android_scripting.FileUtils;
 import com.googlecode.android_scripting.Log;
 import com.googlecode.android_scripting.SingleThreadExecutor;
 import com.googlecode.android_scripting.interpreter.html.HtmlInterpreter;
-import com.googlecode.android_scripting.interpreter.shell.ShellInterpreter;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -229,9 +228,9 @@ public class InterpreterConfiguration {
     File path = new File(context.getFilesDir(), "bin/busybox");
     if (!path.isFile()) {
       path = new File(context.getFilesDir(), "kbox-installer.sh");
-      String url = "http://giuliolunati.altervista.org/kbox/kbox3-installer.sh";
+      String url = "http://giuliolunati.altervista.org/sl4abox/kbox3-installer.sh";
       if (android.os.Build.VERSION.RELEASE.compareTo("4.1") < 0)
-          url = "http://giuliolunati.altervista.org/kbox/kbox2-installer.sh";
+          url = "http://giuliolunati.altervista.org/sl4abox/kbox2-installer.sh";
       try {
         FileUtils.download(url,path);
       } catch (Exception e) {
@@ -438,9 +437,10 @@ public class InterpreterConfiguration {
     if (dotIndex == -1) {
       return null;
     }
-    String ext = scriptName.substring(dotIndex);
+    String ext = scriptName.substring(dotIndex) + ",";
     for (Interpreter i : mInterpreterSet) {
-      if (i.getExtension().equals(ext)) {
+      String e = i.getExtension() + ",";
+      if (e.indexOf(ext) >= 0) {
         return i;
       }
     }

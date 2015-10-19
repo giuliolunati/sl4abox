@@ -263,9 +263,11 @@ public class InterpreterManager extends ListActivity {
       }
       ImageView img = (ImageView) container.findViewById(R.id.list_item_icon);
 
+      String ext = interpreter.getExtension();
+      int i = ext.indexOf(",");
+      if (i > 0) ext = ext.substring(0,i);
       int imgId =
-          FeaturedInterpreters.getInterpreterIcon(InterpreterManager.this,
-              interpreter.getExtension());
+          FeaturedInterpreters.getInterpreterIcon(InterpreterManager.this, ext);
       if (imgId == 0) {
         imgId = R.drawable.sl4a_logo_32;
       }
