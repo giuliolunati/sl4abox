@@ -274,7 +274,7 @@ public class InterpreterConfiguration {
     } catch (IOException e) {
       Log.e("Failed to instantiate HtmlInterpreter.", e);
     }
-    File dir = new File(kbox+"/usr/share/desktop");
+    File dir = new File(kbox+"/etc/plugins");
     if (dir.exists()) {
       File[] files = dir.listFiles();
       Arrays.sort(files);
