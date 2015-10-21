@@ -288,7 +288,6 @@ public class InterpreterConfiguration {
           String ext = "";
           String interact = "";
           String script = "";
-          String install = "";
           BufferedReader r = new BufferedReader(new FileReader(f));
           while ((l = r.readLine()) != null) {
             if (l.startsWith("Name=")) {
@@ -309,9 +308,6 @@ public class InterpreterConfiguration {
             if (l.startsWith("Ext=")) {
               ext = l.substring(4);
             }
-            if (l.startsWith("Install=")) {
-              install = l.substring(8);
-            }
           }
 	  if (tryexec.equals("")) tryexec = exec;
           if (new File(tryexec).exists()) {
@@ -320,16 +316,6 @@ public class InterpreterConfiguration {
                 exec,
                 interact,
                 script,
-                ext,
-                kbox,
-                "/home/kbox"
-            ));
-          } else {
-            mInterpreterSet.add(new KboxInterpreter(
-                "Install " + name,
-                kbox + "/bin/bash",
-                "-c,"+install,
-                "-c,"+install,
                 ext,
                 kbox,
                 "/home/kbox"
