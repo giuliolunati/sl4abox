@@ -44,11 +44,11 @@ public class FacadeManager extends RpcReceiverManager {
   public Object invoke(Class<? extends RpcReceiver> clazz, Method method, Object[] args)
       throws Exception {
     try {
-      if (method.isAnnotationPresent(RpcDeprecated.class)) {
+      if (method.getAnnotation(RpcDeprecated.class) != null) {
         String replacedBy = method.getAnnotation(RpcDeprecated.class).value();
         String title = method.getName() + " is deprecated";
         Log.notify(mService, title, title, String.format("Please use %s instead.", replacedBy));
-      } else if (method.isAnnotationPresent(RpcMinSdk.class)) {
+      } else if (method.getAnnotation(RpcMinSdk.class) != null) {
         int requiredSdkLevel = method.getAnnotation(RpcMinSdk.class).value();
         if (mSdkLevel < requiredSdkLevel) {
           throw new Sl4aException(String.format("%s requires API level %d, current level is %d",

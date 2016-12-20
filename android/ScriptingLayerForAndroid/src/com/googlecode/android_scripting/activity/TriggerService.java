@@ -18,6 +18,7 @@ package com.googlecode.android_scripting.activity;
 
 import android.app.AlarmManager;
 import android.app.Notification;
+import android.app.Notification.Builder;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -105,12 +106,21 @@ public class TriggerService extends ForegroundService {
   /** Returns the notification to display whenever the service is running. */
   @Override
   protected Notification createNotification() {
-    Notification notification =
-        new Notification(R.drawable.sl4a_logo_48, "SL4A Trigger Service started.",
-            System.currentTimeMillis());
     Intent notificationIntent = new Intent(this, TriggerManager.class);
-    notification.setLatestEventInfo(this, "SL4A Trigger Service", "Tap to view triggers",
-        PendingIntent.getActivity(this, 0, notificationIntent, 0));
+    /* Notification notification =
+        new Notification(R.drawable.sl4a_logo_48, "SL4A Trigger Service started.",
+            System.currentTimeMillis()); */
+    Notification.Builder builder = new Notification.Builder(this);
+    builder.setSmallIcon(R.drawable.sl4a_logo_48);
+    builder.setTicker("SL4A Trigger Service started.");
+    builder.setContentTitle("SL4A Trigger Service");
+    builder.setContentText("Tap to view triggers");
+    builder.setContentIntent(PendingIntent.getActivity(this, 0, notificationIntent, 0));
+    builder.build();
+    Notification notification = builder.getNotification();
+    /* notification.setLatestEventInfo(this,
+     "SL4A Trigger Service", "Tap to view triggers",
+     PendingIntent.getActivity(this, 0, notificationIntent, 0)); */
     notification.flags = Notification.FLAG_NO_CLEAR | Notification.FLAG_ONGOING_EVENT;
     return notification;
   }

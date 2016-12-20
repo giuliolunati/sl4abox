@@ -18,6 +18,7 @@ package com.googlecode.android_scripting;
 
 import android.app.AlertDialog;
 import android.app.Notification;
+import android.app.Notification.Builder;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -48,9 +49,16 @@ public class Log {
     int iconId = context.getResources().getIdentifier("stat_sys_warning", "drawable", packageName);
     NotificationManager notificationManager =
         (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-    Notification note = new Notification(iconId > 0 ? iconId : -1, title, 0);
-    note.setLatestEventInfo(context, contentTitle, message, PendingIntent.getService(context, 0,
-        null, 0));
+    // Notification note = new Notification(iconId > 0 ? iconId : -1, title, 0);
+    Notification.Builder builder = new Notification.Builder(context);
+    builder.setSmallIcon(iconId);
+    builder.setTicker(title);
+    builder.setContentTitle(contentTitle);
+    builder.setContentText(message);
+    builder.setContentIntent(PendingIntent.getService(context, 0, null, 0));
+    builder.build();
+    Notification note = builder.getNotification();
+    // note.setLatestEventInfo(context, contentTitle, message, PendingIntent.getService(context, 0, null,0));
     note.contentView.getLayoutId();
     notificationManager.notify(NotificationIdFactory.create(), note);
   }

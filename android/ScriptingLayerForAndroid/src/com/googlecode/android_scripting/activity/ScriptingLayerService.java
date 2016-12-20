@@ -17,6 +17,7 @@
 package com.googlecode.android_scripting.activity;
 
 import android.app.Notification;
+import android.app.Notification.Builder;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -63,6 +64,7 @@ public class ScriptingLayerService extends ForegroundService {
   private volatile int mModCount = 0;
   private NotificationManager mNotificationManager;
   private Notification mNotification;
+  private Notification.Builder mBuilder;
   private PendingIntent mNotificationPendingIntent;
   private InterpreterConfiguration mInterpreterConfiguration;
 
@@ -103,25 +105,35 @@ public class ScriptingLayerService extends ForegroundService {
 
   @Override
   protected Notification createNotification() {
-    mNotification =
-        new Notification(R.drawable.sl4a_notification_logo, null, System.currentTimeMillis());
-    mNotification.flags = Notification.FLAG_NO_CLEAR | Notification.FLAG_ONGOING_EVENT;
     Intent notificationIntent = new Intent(this, ScriptingLayerService.class);
     notificationIntent.setAction(Constants.ACTION_SHOW_RUNNING_SCRIPTS);
     mNotificationPendingIntent = PendingIntent.getService(this, 0, notificationIntent, 0);
+    mBuilder = new Notification.Builder(this);
+    mBuilder.setSmallIcon(R.drawable.sl4a_notification_logo);
+    mBuilder.setContentTitle("SL4A Service");
+    mBuilder.setTicker(null);
+    mBuilder.setContentText("Tap to view running scripts");
+    mBuilder.setContentIntent(mNotificationPendingIntent);
+    mBuilder.build();
+    Notification mNotification = mBuilder.getNotification();
+    /* mNotification =
+        new Notification(R.drawable.sl4a_notification_logo, null, System.currentTimeMillis());
     mNotification.setLatestEventInfo(this, "SL4A Service", "Tap to view running scripts",
-        mNotificationPendingIntent);
+        mNotificationPendingIntent); */
+    mNotification.flags = Notification.FLAG_NO_CLEAR | Notification.FLAG_ONGOING_EVENT;
     return mNotification;
   }
 
   private void updateNotification(String tickerText) {
-    mNotification.iconLevel = mProcessMap.size();
-    if (tickerText.equals(mNotification.tickerText)) {
+    mBuilder = new Notification.Builder(this);
+    mBuilder.setSmallIcon(R.drawable.sl4a_notification_logo);
+    mBuilder.setContentTitle("SL4A Service");
+    if ((mNotification != null) && tickerText.equals(mNotification.tickerText)) {
       // Consequent notifications with the same ticker-text are displayed without any ticker-text.
       // This is a way around. Alternatively, we can display process name and port.
-      mNotification.tickerText = tickerText + " ";
+      mBuilder.setTicker(tickerText + " ");
     } else {
-      mNotification.tickerText = tickerText;
+      mBuilder.setTicker(tickerText);
     }
     String msg;
     if (mProcessMap.size() <= 1) {
@@ -129,7 +141,12 @@ public class ScriptingLayerService extends ForegroundService {
     } else {
       msg = "Tap to view " + Integer.toString(mProcessMap.size()) + " running scripts";
     }
-    mNotification.setLatestEventInfo(this, "SL4A Service", msg, mNotificationPendingIntent);
+    mBuilder.setContentText(msg);
+    mBuilder.setContentIntent(mNotificationPendingIntent);
+    mBuilder.build();
+    //mNotification.setLatestEventInfo(this, "SL4A Service", msg, mNotificationPendingIntent);
+    mNotification = mBuilder.getNotification();
+    mNotification.iconLevel = mProcessMap.size();
     mNotificationManager.notify(NOTIFICATION_ID, mNotification);
   }
 

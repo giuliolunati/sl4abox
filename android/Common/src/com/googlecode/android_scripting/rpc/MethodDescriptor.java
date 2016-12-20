@@ -64,7 +64,7 @@ public final class MethodDescriptor {
   public static Collection<MethodDescriptor> collectFrom(Class<? extends RpcReceiver> clazz) {
     List<MethodDescriptor> descriptors = new ArrayList<MethodDescriptor>();
     for (Method method : clazz.getMethods()) {
-      if (method.isAnnotationPresent(Rpc.class)) {
+      if (method.getAnnotation(Rpc.class) != null) {
         descriptors.add(new MethodDescriptor(clazz, method));
       }
     }
@@ -197,7 +197,7 @@ public final class MethodDescriptor {
   }
 
   public String getName() {
-    if (mMethod.isAnnotationPresent(RpcName.class)) {
+    if (mMethod.getAnnotation(RpcName.class) != null) {
       return mMethod.getAnnotation(RpcName.class).name();
     }
     return mMethod.getName();
@@ -242,12 +242,12 @@ public final class MethodDescriptor {
       helpBuilder.append(rpcAnnotation.returns());
     }
 
-    if (mMethod.isAnnotationPresent(RpcStartEvent.class)) {
+    if (mMethod.getAnnotation(RpcStartEvent.class) != null) {
       String eventName = mMethod.getAnnotation(RpcStartEvent.class).value();
       helpBuilder.append(String.format("\n\nGenerates \"%s\" events.", eventName));
     }
 
-    if (mMethod.isAnnotationPresent(RpcDeprecated.class)) {
+    if (mMethod.getAnnotation(RpcDeprecated.class) != null) {
       String replacedBy = mMethod.getAnnotation(RpcDeprecated.class).value();
       String release = mMethod.getAnnotation(RpcDeprecated.class).release();
       helpBuilder.append(String.format("\n\nDeprecated in %s! Please use %s instead.", release,

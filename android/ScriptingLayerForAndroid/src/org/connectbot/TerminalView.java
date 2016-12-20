@@ -23,7 +23,8 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.PixelXorXfermode;
+import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
@@ -74,8 +75,9 @@ public class TerminalView extends View implements FontSizeChangedListener {
     setFocusableInTouchMode(true);
 
     cursorPaint = new Paint();
-    cursorPaint.setColor(bridge.getForegroundColor());
-    cursorPaint.setXfermode(new PixelXorXfermode(bridge.getBackgroundColor()));
+    cursorPaint.setColor(0xFF777777);
+    //cursorPaint.setColor(bridge.getForegroundColor());
+    cursorPaint.setXfermode(new PorterDuffXfermode(Mode.SCREEN));
     cursorPaint.setAntiAlias(true);
 
     cursorStrokePaint = new Paint(cursorPaint);

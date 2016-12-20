@@ -57,9 +57,9 @@ public class ApiProvider extends ContentProvider {
               @Override
               public boolean apply(MethodDescriptor descriptor) {
                 Method method = descriptor.getMethod();
-                if (method.isAnnotationPresent(RpcDeprecated.class)) {
+                if (method.getAnnotation(RpcDeprecated.class) != null) {
                   return false;
-                } else if (method.isAnnotationPresent(RpcMinSdk.class)) {
+                } else if (method.getAnnotation(RpcMinSdk.class) != null) {
                   int requiredSdkLevel = method.getAnnotation(RpcMinSdk.class).value();
                   if (FacadeConfiguration.getSdkLevel() < requiredSdkLevel) {
                     return false;

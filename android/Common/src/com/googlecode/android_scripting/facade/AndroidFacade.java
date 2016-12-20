@@ -18,6 +18,7 @@ package com.googlecode.android_scripting.facade;
 
 import android.app.AlertDialog;
 import android.app.Notification;
+import android.app.Notification.Builder;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -587,11 +588,20 @@ public class AndroidFacade extends RpcReceiver {
   @Rpc(description = "Displays a notification that will be canceled when the user clicks on it.")
   public void notify(@RpcParameter(name = "title", description = "title") String title,
       @RpcParameter(name = "message") String message) {
-    Notification notification =
-        new Notification(mResources.getLogo48(), message, System.currentTimeMillis());
     // This contentIntent is a noop.
     PendingIntent contentIntent = PendingIntent.getService(mService, 0, new Intent(), 0);
-    notification.setLatestEventInfo(mService, title, message, contentIntent);
+    Notification.Builder builder = new Notification.Builder(mService);
+    builder.setSmallIcon(mResources.getLogo48());
+    builder.setTicker(message);
+    builder.setContentTitle(title);
+    builder.setContentText(message);
+    builder.setContentIntent(contentIntent);
+    builder.build();
+    Notification notification = builder.getNotification();
+    /* Notification notification =
+        new Notification(mResources.getLogo48(), message, System.currentTimeMillis());
+    notification.setLatestEventInfo(mService, title, message, contentIntent); */
+
     notification.flags = Notification.FLAG_AUTO_CANCEL;
 
     // Get a unique notification id from the application.

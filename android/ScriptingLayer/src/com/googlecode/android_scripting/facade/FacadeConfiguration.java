@@ -134,9 +134,9 @@ public class FacadeConfiguration {
     List<MethodDescriptor> list = new ArrayList<MethodDescriptor>();
     for (MethodDescriptor descriptor : sRpcs.values()) {
       Method method = descriptor.getMethod();
-      if (method.isAnnotationPresent(RpcDeprecated.class)) {
+      if (method.getAnnotation(RpcDeprecated.class) != null) {
         continue;
-      } else if (method.isAnnotationPresent(RpcMinSdk.class)) {
+      } else if (method.getAnnotation(RpcMinSdk.class) != null) {
         int requiredSdkLevel = method.getAnnotation(RpcMinSdk.class).value();
         if (sSdkLevel < requiredSdkLevel) {
           continue;
@@ -151,7 +151,7 @@ public class FacadeConfiguration {
     Map<String, MethodDescriptor> map = Maps.newHashMap();
     for (MethodDescriptor descriptor : sRpcs.values()) {
       Method method = descriptor.getMethod();
-      if (method.isAnnotationPresent(RpcStartEvent.class)) {
+      if (method.getAnnotation(RpcStartEvent.class) != null) {
         String eventName = method.getAnnotation(RpcStartEvent.class).value();
         if (map.containsKey(eventName)) {
           throw new RuntimeException("Duplicate start event method descriptor found.");
@@ -166,7 +166,7 @@ public class FacadeConfiguration {
     Map<String, MethodDescriptor> map = Maps.newHashMap();
     for (MethodDescriptor descriptor : sRpcs.values()) {
       Method method = descriptor.getMethod();
-      if (method.isAnnotationPresent(RpcStopEvent.class)) {
+      if (method.getAnnotation(RpcStopEvent.class) != null) {
         String eventName = method.getAnnotation(RpcStopEvent.class).value();
         if (map.containsKey(eventName)) {
           throw new RuntimeException("Duplicate stop event method descriptor found.");
