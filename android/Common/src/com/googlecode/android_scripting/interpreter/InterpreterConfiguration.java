@@ -258,7 +258,7 @@ public class InterpreterConfiguration {
     // install r3
     path = new File(context.getFilesDir(), "usr/bin/r3");
     if (!path.isFile()) {
-      String[] cmds = {"/system/bin/sh",context.getFilesDir()+"/bin/kbox_shell","-c","/bin/kpkg i r3"};
+      String[] cmds = {"/system/bin/sh",context.getFilesDir()+"/bin/kbox_shell","-c","/bin/kpkg -i r3"};
       ProcessBuilder pb = new ProcessBuilder(cmds);
       pb.directory(context.getFilesDir());
       try {
